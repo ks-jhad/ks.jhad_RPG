@@ -1,41 +1,26 @@
-﻿/*
+/*
 ——————————————————
  メイン 処理
 ——————————————————
 */
-#include "stdio.h"
-#include "stdlib.h"
-#include "time.h"
-#include "stdlib.h"
-#include "string.h"
-#include "ctype.h"
-#include "time.h"
-#include "conio.h"
+#include <stdio.h>
+#include <stdlib.h>
+#include <time.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.>
+#include <time.h>
+#include <conio.h>
 #include "main_IF.h"
 #include "mainTbl.h"
 
-//————————————————————————
+//------------------------------------------------
 //   内部関数
-//————————————————————————
-static void space(void);
-static void dispcls(void);
-static void mainDisp(void);
+//------------------------------------------------
 static void comFin(void);
 static void comChange(void);
 static void playerMain(void);
-static UCHAR playerSet(UCHAR mob);
-static void playerReady(UCHAR mob);
-static void playerEnter(UCHAR mob);
-static void playerIncre(UCHAR mob);
-static void playerDecre(void);
 static void enwmyset(void);
-static void itemMain(void);
-static void itemSet(UCHAR item);
-static UCHAR itemChoice(UCHAR com, UCHAR item);
-static void itemReady(UCHAR com, UCHAR item);
-static void itemEnter(UCHAR com, UCHAR item);
-static void itemIncre(UCHAR com, UCHAR item);
-static void itemDecre(UCHAR com, UCHAR item);
 static void fightMain();
 static void enemySubDisp();
 static void enemySet();
@@ -66,6 +51,82 @@ static UCHAR skillAll;
 static UCHAR skillKind[2][SKILL_MAX];
 static UCHAR skillSW[2][SKILL_MAX];
 
+//-------------------------------------------------
+//			 メインループ
+//-------------------------------------------------
+int main()
+{	
+	CHAR command, i;
+	
+	while(1){		
+		mainDisp();
+		command = (MAIN_COM_MAX + command) % MAIN_COM_MAX;
+		printf("＋ーーーーーー 選択 ーーーーーー＋\n");
+		for(i = 0; i < MAIN_COM_MAX; i++){
+			printf("｜		%s	%s		｜\n",(i == command)?"→":" ",mainCommand[i]);
+		}
+		printf("＋ーーーーーーーーーーーーーーー＋\n");
+		switch(comSet(&command)){
+			case CURSOR_ENTER:
+				if(MAIN_COM_C == command){playerMain();}
+				if(MAIN_COM_E == command){itemSW = OFF;itemMain();}
+				if(MAIN_COM_F == command){comFin();}
+				break;
+			case CURSOR_BACK:
+				break;
+		}
+	}
+}
+//————————————————————————-
+//			 メインディスプレイ
+//————————————————————————-
+static void mainDisp(void)
+{	
+	dispcls();		
+	printf(	"＋ーーーーーステータスーーーーー＋\n");
+	printf("｜	キャラ	:%s			｜\n",(playerAll == ON)?playerName[oldmob]:"未選択	");
+	for(UCHAR i = 0; i < ITEM_MAX; i++){
+		printf("｜	%s:%s	｜\n",itemName[i],((itemAll >> i) & 0x01)?itemNameTbl[i][olditem[i]] :"未選択			");
+	}
+	if(player.strength	< 0)	player.strength	= 0;
+	if(player.defence	< 0)	player.defence	= 0;
+	if(player.maxHP		< 0)	player.maxHP	= 0;
+	if(player.maxMP		< 0)	player.maxMP	= 0;
+	if(player.agility	< 0)	player.agility	= 0;
+	if(player.luck		< 0)	player.luck		= 0;	
+	printf("｜	%s:	%d				｜\n",statusName[STATUS_STRENGTH]	,player.strength);
+	printf("｜	%s:	%d				｜\n",statusName[STATUS_DEFENCE]		,player.defence	);
+	printf("｜	%s:	%d				｜\n",statusName[STATUS_HP]			,player.maxHP	);
+	printf("｜	%s:	%d				｜\n",statusName[STATUS_MP]			,player.maxMP	);
+	printf("｜	%s:	%d				｜\n",statusName[STATUS_AGILITY]		,player.agility	);
+	printf("｜	%s:	%d				｜\n",statusName[STATUS_RUCK]		,player.luck	);
+	printf(	"＋ーーーーーーーーーーーーーーー＋\n");
+}
+//————————————————————————-
+//			 
+//————————————————————————-
+UCHAR comSet(CHAR *command)
+{	
+	CHAR ch = getch();
+	switch(ch){
+		case CURSOR_ENTER:	break;
+		case CURSOR_BACK:		break;
+		case CURSOR_UP:		*command += 1;	break;
+		case CURSOR_DOWN:	*command -= 1;	break;
+	}
+	return(ch);
+}
+//————————————————————————-
+//		 画面クリア関数
+//————————————————————————-
+ extern void dispcls(void)
+{
+	system("cls");
+}
+static void space(void)
+{
+	printf("				");	
+}
 //————————————————————————-
 //		 
 //————————————————————————-
@@ -112,60 +173,6 @@ static void enemySet()
 	enemy.maxMP		= enemyStuTbl[s][STATUS_MP];
 	enemy.agility	= enemyStuTbl[s][STATUS_AGILITY];
 	enemy.luck		= enemyStuTbl[s][STATUS_RUCK];
-}
-//————————————————————————-
-//		 画面クリア関数
-//————————————————————————-
- extern void dispcls(void)
-{
-	system("cls");
-}
-static void space(void)
-{
-	printf("				");	
-}
-//————————————————————————-
-//			 
-//————————————————————————-
-static UCHAR comSet(CHAR *command)
-{	
-	CHAR ch = getch();
-	switch(ch){
-		case CURSOR_ENTER:	break;
-		case CURSOR_BACK:	break;
-		case CURSOR_UP:		*command += 1;	break;
-		case CURSOR_DOWN:	*command -= 1;	break;
-	}
-	return(ch);
-}
-//————————————————————————-
-//			 メインディスプレイ
-//————————————————————————-
-static void mainDisp(void)
-{	
-	dispcls();		
-	printf(	"＋ーーーーーステータスーーーーー＋\n");
-	printf("｜	キャラ	:%s			｜\n"
-	,(playerAll == ON)?playerName[oldmob]:"未選択	");
-	for(UCHAR i = 0; i < ITEM_MAX; i++){
-		printf("｜	%s:%s	｜\n",itemName[i]
-		,((itemAll >> i) & 0x01)?
-		itemNameTbl[i][olditem[i]] :
-		"未選択			");
-	}
-	if(player.strength	< 0)	player.strength	= 0;
-	if(player.defence	< 0)	player.defence	= 0;
-	if(player.maxHP		< 0)	player.maxHP	= 0;
-	if(player.maxMP		< 0)	player.maxMP	= 0;
-	if(player.agility	< 0)	player.agility	= 0;
-	if(player.luck		< 0)	player.luck		= 0;	
-	printf("｜	%s:	%d				｜\n",statusName[STATUS_STRENGTH]	,player.strength);
-	printf("｜	%s:	%d				｜\n",statusName[STATUS_DEFENCE]		,player.defence	);
-	printf("｜	%s:	%d				｜\n",statusName[STATUS_HP]			,player.maxHP	);
-	printf("｜	%s:	%d				｜\n",statusName[STATUS_MP]			,player.maxMP	);
-	printf("｜	%s:	%d				｜\n",statusName[STATUS_AGILITY]		,player.agility	);
-	printf("｜	%s:	%d				｜\n",statusName[STATUS_RUCK]		,player.luck	);
-	printf(	"＋ーーーーーーーーーーーーーーー＋\n");
 }
 //————————————————————————-
 //			 最終決定
@@ -222,165 +229,6 @@ static void comChange(void)
 		}
 	}
 }
-//————————————————————————-
-//			 メインループ
-//————————————————————————-
-int main()
-{	
-	CHAR command, i;
-	while(1){		
-		mainDisp();
-		command = (MAIN_COM_MAX + command) % MAIN_COM_MAX;
-		printf("＋ーーーーーー 選択 ーーーーーー＋\n");
-		for(i = 0; i < MAIN_COM_MAX; i++){
-			printf("｜		%s	%s		｜\n",(i == command)?"→":" ",mainCommand[i]);
-		}
-		printf("＋ーーーーーーーーーーーーーーー＋\n");
-		switch(comSet(&command)){
-			case CURSOR_ENTER:
-				if(MAIN_COM_C == command){playerMain();}
-				if(MAIN_COM_E == command){itemSW = OFF;itemMain();}
-				if(MAIN_COM_F == command){comFin();}
-				break;
-			case CURSOR_BACK:
-				break;
-		}
-	}
-}
-/*
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-	キャラクター関連処理
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-*/
-//————————————————————————-
-//		キャラ選択
-//————————————————————————-
-static void playerMain(void)
-{
-	CHAR mob, sw;
-		
-	while(1){		
-		mainDisp();
-		mob = (PLAYER_NAME_MAX + mob) % PLAYER_NAME_MAX;
-		printf("＋ーーーーキャラ を 選択ーーーー＋\n");
-		for(int i = 0; i < PLAYER_NAME_MAX; i++){
-			printf("｜		%s	%s			｜\n"
-			,(i == mob)?"→":" ",playerName[i]);
-		}
-		printf("＋ーーーーーーーーーーーーーーー＋\n");
-		switch(comSet(&mob)){
-			case CURSOR_ENTER:
-				if(CHOICE_YES == playerSet(mob)){ sw = ON;break; }
-			case CURSOR_BACK:
-				sw = ON;
-				break;
-		}
-		if(sw)	break;	
-	}
-}
-//————————————————————————-
-//		キャラクター設定
-//————————————————————————-
-static UCHAR playerSet(UCHAR mob)
-{
-	CHAR i, s, ch, choice;
-	
-	while(1){ 
-		mainDisp();	
-		printf(	"＋ーーーーーーーーーーーーーーー＋\n");
-		for(i = 0; i < STATUS_MAX; i++){
-			printf("｜	%s:	%d	→	%d		｜\n"
-			,statusName[i]
-			,(playerAll == ON)?playerStuTbl[oldmob][i]: 0
-			,playerStuTbl[mob][i]);
-		}
-		printf(	"＋ーーーーーーーーーーーーーーー＋\n");
-		printf("｜								｜\n");
-		printf("｜		%s  				｜\n",playerName[mob]);
-		printf("｜		にしますか？	  		｜\n");
-		choice = ((CHOICE_MAX + choice) % CHOICE_MAX);
-		for(s = 0; s < CHOICE_MAX; s++){
-			printf("｜	%s ・%s		 		｜\n",(s == choice)?"→":"  ",choiceName[s]);
-		}
-		printf("＋ーーーーーーーーーーーーーーー＋\n");
-		if(CURSOR_ENTER == comSet(&choice)){
-			if(choice == CHOICE_YES){	
-				if(playerAll == ON)	playerReady(mob);
-				else				playerEnter(mob);
-			}
-			return(choice);
-		}	
-	}	
-}
-//————————————————————————-
-//		キャラクター決定
-//————————————————————————-
-static void playerEnter(UCHAR mob)
-{
-	playerIncre(mob);
-	mainDisp();
-	printf("＋ーーーーーーーーーーーーーーー＋\n");
-	printf("｜		  		  		  		｜\n");
-	printf("｜		%s  				｜\n",playerName[mob]);
-	printf("｜		を選択しました			｜\n");
-	printf("｜						  		｜\n");
-	printf("＋ーーーーーーーーーーーーーーー＋\n");
-	getch();
-}
-//————————————————————————-
-//		キャラクター変更
-//————————————————————————-
-static void playerReady(UCHAR mob)
-{
-	CHAR choice, ch, s;
-	
-	while(1){
-		mainDisp();
-		printf("＋ーーーーーーーーーーーーーーー＋\n");
-		printf("｜		%s  				｜\n",playerName[oldmob]);
-		printf("｜		を選択済みです。   		｜\n");
-		printf("｜						  		｜\n");
-		printf("｜		変更しますか？	  		｜\n");
-		for(s = 0; s < CHOICE_MAX; s++){
-			choice = ((CHOICE_MAX + choice) % CHOICE_MAX);
-			printf("｜	%s ・%s		  		｜\n",(s == choice)?"→":"  ",choiceName[s]);
-		}
-		printf("＋ーーーーーーーーーーーーーーー＋\n");
-		if(CURSOR_ENTER == comSet(&choice)){
-			if(choice == CHOICE_YES){	
-				playerDecre();
-				playerEnter(mob);
-				break;
-			}
-		}	
-	}
-}
-//————————————————————————-
-//		ステータス加算(キャラクター)
-//————————————————————————-
-static void playerIncre(UCHAR mob)
-{
-	player.strength	+= playerStuTbl[mob][STATUS_STRENGTH];
-	player.defence	+= playerStuTbl[mob][STATUS_DEFENCE];
-	player.maxHP	+= playerStuTbl[mob][STATUS_HP];
-	player.maxMP	+= playerStuTbl[mob][STATUS_MP];
-	player.agility	+= playerStuTbl[mob][STATUS_AGILITY];
-	player.luck		+= playerStuTbl[mob][STATUS_RUCK];
-	oldmob	 		 = mob;
-	playerAll		 = ON;
-}
-//————————————————————————-
-//		ステータス減算(キャラクター)
-//————————————————————————-
-static void playerDecre(void)
-{
-	player.strength	-= playerStuTbl[oldmob][STATUS_STRENGTH];
-	player.defence	-= playerStuTbl[oldmob][STATUS_DEFENCE];
-	player.maxHP	-= playerStuTbl[oldmob][STATUS_HP];
-	player.maxMP	-= playerStuTbl[oldmob][STATUS_MP];
-	player.agility	-= playerStuTbl[oldmob][STATUS_AGILITY];
-	player.luck		-= playerStuTbl[oldmob][STATUS_RUCK];
-}	
 /*
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 	アイテム関連処理

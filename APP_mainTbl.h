@@ -1,4 +1,4 @@
-﻿/*
+/*
 ==========================================================
 
 ==========================================================
@@ -254,3 +254,15 @@ extern const CHAR skillDescEnTbl[SKILL_MAX][MOZI_10] =
 	"	",
 	"	",
 };
+
+extern const CHAR itemNameTbl[ITEM_MAX][MOZI_3];
+extern const CHAR statusNameTbl[STATUS_MAX][MOZI_3];
+extern const CHAR playerNameTbl[PLAYER_NAME_MAX][MOZI_4];
+extern const CHAR itemNameTbl[ITEM_MAX][ITEM_NAME_MAX][MOZI_7];
+extern const SHORT itemTbl[ITEM_MAX][ITEM_NAME_MAX][STATUS_MAX];
+extern const SHORT playerTbl[PLAYER_NAME_MAX][STATUS_MAX];
+extern const CHAR fightCommandTbl[FIGHT_COM_MAX][MOZI_4];
+extern const SHORT skillParaTbl[SKILL_MAX][STATUS_MAX];
+extern const CHAR skillTurnTbl[SKILL_MAX];
+extern const UCHAR skillNameTbl[SKILL_MAX][MOZI_10];
+extern const UCHAR skillDescTbl[SKILL_MAX][MOZI_25];
